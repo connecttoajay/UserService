@@ -1,0 +1,47 @@
+server:
+  port: 9002
+
+spring:
+  application:
+    name: USER-SERVICE
+  config:
+    import: configserver:http://localhost:9004
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+
+resilience4j:
+  circuitbreaker:
+    instances:
+        CB_1:
+          registerHealthIndicator: true
+          automaticTransitionFromOpenToHalfOpenEnabled: true
+          permittedNumberOfCallsInHalfOpenState: 3
+          minimumNumberOfCalls: 5
+          waitDurationInOpenState: 5s
+          failureRateThreshold: 50
+          eventConsumerBufferSize: 10
+          slidingWindowSize: 10
+          slidingWindowType: COUNT_BASED
+  retry:
+    instances:
+      CB_1:
+        registerHealthIndicator: true
+        waitDuration: 3s
+        MaxRetryAttempts: 5
+  ratelimiter:
+    instances:
+      CB_1:
+        registerHealthIndicator: false
+        limitForPeriod: 10
+        limitRefreshPeriod: 5s
+        timeoutDuration: 10s
+          
